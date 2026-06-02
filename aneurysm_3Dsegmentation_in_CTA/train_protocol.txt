@@ -1,0 +1,18 @@
+
+
+# training models :
+ # run full pipeline to debug
+ # choose between the SEresnet18 and SEresnet34 by training on base line
+ # going for encoder feature selection (may higher skip connecyions are better beacause of better resolution)
+ # train on full-freeze and semi-freeze to find the best performance
+ # starting training ... 
+ 
+
+
+ # performance evaluation metrics :
+   # 1 - voxel wise prediction
+   # 2 - DSC
+   # 3 - Hausdorff distance
+   # 4 - distances differences metric == point to point evaluations of boundaries
+
+

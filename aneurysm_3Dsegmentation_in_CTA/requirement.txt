@@ -1,0 +1,6 @@
+tensorflow
+keras
+nibabel
+scipy
+numpy
+segmentation_models_3D

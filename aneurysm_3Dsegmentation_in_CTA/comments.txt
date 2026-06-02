@@ -1,0 +1,10 @@
+# 1 - CT images are 16 bit integer of SV in dicom CT images need rescale to to actual HU of CT images (no change in dicom to nifti process as all slices are same)
+# 2 - get_fdata automatically apply rescaling
+# 3 - graph is language-indepandant data structure (C++), sees full plan at once (computation and data) which make parallism more efficiently and speedy
+# 4 - challenges (reading file and loading to graph which is more speedy if possible) , (compatibility of functions and graph)
+# 5 - pipline : volcrop --> cache on SSD --> random geo aug --> random window aug
+# 6 - sequential and parallel running (simple core as worker vs multi worker on different core)
+# 7 - ram consumtion ==> operations , batchs(heart beat or flat cache) , cache , shuffle buffer
+# 8 - shapes can be None but values couldent so it will throw an error in trace mode of graph , sometimes error are run times
+# 9 - compilation errors
+# 10 - in binary ssegmentation task , you will just get one channel as an output
