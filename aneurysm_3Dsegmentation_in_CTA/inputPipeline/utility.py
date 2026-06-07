@@ -9,6 +9,7 @@ def read_img(imgPath , labelPath) : # fixed
     labelPath = labelPath.numpy().decode("utf_8")
     img   = nib.as_closest_canonical(nib.load(imgPath)) # standard image shape
     label = nib.as_closest_canonical(nib.load(labelPath))
+    tf.print("raw image shape : " , img.shape)
     imgTensor   = img.get_fdata()
     labelTesnor = label.get_fdata()
     return imgTensor, labelTesnor
@@ -213,8 +214,16 @@ class randomGeo : # should be wrapped with py func
         return img_arr , label_arr
     
 def normalize(img , label) :
-    max   = tf.math.reduce_max(img)
-    min   = tf.math.reduce_min(img)
+    max   = tf.math.reduce_max(
+        img , 
+        axis=[1 , 2 , 3 , 4] ,
+        keepdims=True
+    )
+    min   = tf.math.reduce_min(
+        img ,
+        axis=[1 , 2 , 3 , 4] ,
+        keepdims=True
+    )
     n_img = (img - min)/(max - min)
     return n_img , label
 
