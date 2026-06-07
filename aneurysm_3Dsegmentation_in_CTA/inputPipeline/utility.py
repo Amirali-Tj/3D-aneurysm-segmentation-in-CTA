@@ -173,7 +173,7 @@ class randomGeo : # should be wrapped with py func
                 ndimage.rotate(
                     img_arr ,
                     angle ,
-                    axes=(0 , 1) ,
+                    axes=(1 , 2) , # vectorizing
                     reshape=False,
                     order=imgOrder ,
                     mode='constant' ,
@@ -182,7 +182,7 @@ class randomGeo : # should be wrapped with py func
                 ndimage.rotate(
                     label_arr ,
                     angle ,
-                    axes=(0 , 1) ,
+                    axes=(1 , 2) , # vectorizing
                     reshape=False,
                     order=lblOrder ,
                     mode='constant' ,
@@ -195,7 +195,7 @@ class randomGeo : # should be wrapped with py func
     
     def flip(self , img_arr , label_arr) : 
         chance = tf.random.uniform(shape=()  , dtype=tf.float32)
-        axis   = tf.random.uniform(shape=() , minval=0 , maxval=3 , dtype=tf.int32)
+        axis   = tf.random.uniform(shape=() , minval=1 , maxval=3 , dtype=tf.int32) # vectorizing
         img_arr , label_arr = tf.cond(
             chance <= self.p ,
             lambda : (
@@ -213,8 +213,14 @@ class randomGeo : # should be wrapped with py func
         return img_arr , label_arr
     
 def normalize(img , label) :
-    max   = tf.math.reduce_max(img)
-    min   = tf.math.reduce_min(img)
+    max   = tf.math.reduce_max(
+        img ,
+        axis=[1 , 2 , 3 , 4]
+    )
+    min   = tf.math.reduce_min(
+        img ,
+        axis=[1 , 2 , 3 , 4]
+    )
     n_img = (img - min)/(max - min)
     return n_img , label
 
