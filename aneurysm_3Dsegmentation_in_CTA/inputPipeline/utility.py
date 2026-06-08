@@ -9,7 +9,6 @@ def read_img(imgPath , labelPath) : # fixed
     labelPath = labelPath.numpy().decode("utf_8")
     img   = nib.as_closest_canonical(nib.load(imgPath)) # standard image shape
     label = nib.as_closest_canonical(nib.load(labelPath))
-    tf.print("raw image shape : " , img.shape)
     imgTensor   = img.get_fdata()
     labelTesnor = label.get_fdata()
     return imgTensor, labelTesnor
@@ -213,6 +212,8 @@ class randomGeo : # should be wrapped with py func
         )
         return img_arr , label_arr
     
+# vectorize functions
+
 def normalize(img , label) :
     max   = tf.math.reduce_max(
         img , 
@@ -227,6 +228,48 @@ def normalize(img , label) :
     n_img = (img - min)/(max - min)
     return n_img , label
 
+
+def convert_to_channel_last(img , label) :
+    img = tf.transpose(
+        img , 
+        perm = [0 , 2 , 3 , 4 , 1]
+    )
+
+    label = tf.transpose(
+        label ,
+        perm = [0 , 2 , 3 , 4 , 1]
+    )
+    return img , label
+
+
+class tile :
+    def __init__(self , tile_dim):
+        self.tile_dim = tile_dim
+    def tile(self , img , label) :
+        img   = tf.tile(img , self.tile_dim)
+        label = tf.tile(label , self.tile_dim)
+        return img , label
+    
+
+def cast(img , label) :
+    img = tf.cast(
+        img , 
+        dtype=tf.float32
+    )
+
+    label = tf.cast(
+        label , 
+        dtype=tf.float32
+    )
+    return img , label
+
+def final(img , label) :
+
+    img.set_shape([None , 128 , 128 , 128 , 3])
+    label.set_shape([None , 128 , 128 , 128 , 3])
+    
+    return img , label
+    
     
 
 
