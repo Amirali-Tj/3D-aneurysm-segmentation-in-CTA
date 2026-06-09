@@ -17,7 +17,7 @@ def decimal_numbers(num , decimalNum) :
 
 
 def V_Recall(gr , pr) :   # lesion voxel detection rate
-    pr = tf.where(pr >=0.5 , 1 , 0)
+    pr = tf.where(pr >=0.5 , 1.0 , 0.0)
     tPos  = tf.math.multiply(gr , pr)
     NtPos = tf.math.count_nonzero(
        tPos , 
@@ -32,10 +32,10 @@ def V_Recall(gr , pr) :   # lesion voxel detection rate
        dtype=tf.int32
     )
     V_Recall = tf.math.divide(NtPos , NgrPos)*100
-    return decimal_numbers(tf.math.reduce_mean(V_Recall) , 3) #tf.float64    
+    return decimal_numbers(V_Recall , 3) #tf.float64    
 
 def V_accuracy(gr , pr) : #voxel detection rate (lesion and backgeound)
-    pr = tf.where(pr >=0.5 , 1 , 0)
+    pr = tf.where(pr >=0.5 , 1.0 , 0.0)
     tPos  = tf.math.multiply(gr , pr)
     NtPos = tf.math.count_nonzero(
        tPos , 
@@ -50,8 +50,8 @@ def V_accuracy(gr , pr) : #voxel detection rate (lesion and backgeound)
        dtype=tf.int32
     )
     #-----
-    rPr = tf.where(pr == 0 , 1 , 0)
-    rGr = tf.where(gr == 0 , 1 , 0)
+    rPr = tf.where(pr == 0 , 1.0 , 0.0)
+    rGr = tf.where(gr == 0 , 1.0 , 0.0)
     tNeg  = tf.math.multiply(rGr , rPr)
     NtNeg = tf.math.count_nonzero(
        tNeg , 
@@ -61,10 +61,9 @@ def V_accuracy(gr , pr) : #voxel detection rate (lesion and backgeound)
     )
     NofVoxels = tf.size(tf.reduce_mean(gr , axis=0)) # num of voxels
     V_accuracy =tf.math.multiply(tf.math.divide(NtPos + NtNeg , NofVoxels) , 100)
-    return decimal_numbers(tf.reduce_mean(V_accuracy) , 3) # tf.float64
+    return decimal_numbers(V_accuracy , 3) # tf.float64
 
-@tf.py_function(Tout=tf.float64)
-def HD(y_true , y_pred) : 
+def HD(y_true , y_pred) :
     y_true = np.where( # make a bool numpy array
         y_true.numpy() == 1 ,
         True ,
@@ -88,11 +87,11 @@ def HD(y_true , y_pred) :
             percent=95
         )
         batchHD.append(hausdorff)
-    
+
     return decimal_numbers(tf.reduce_mean(batchHD) , 3)
      
 def dice(y_true , y_pred) :
-    y_pred = tf.where(y_pred >=0.5 , 1 , 0)
+    y_pred = tf.where(y_pred >=0.5 , 1.0 , 0.0)
     overLapArea = 2*tf.math.count_nonzero(
         tf.multiply(y_true , y_pred) ,
         axis = [1 , 2 , 3 ,4] ,
@@ -112,5 +111,5 @@ def dice(y_true , y_pred) :
         dtype=tf.int32
     )
     Dice_score = tf.math.divide(overLapArea , grPos + prPos)
-    return decimal_numbers(tf.reduce_mean(Dice_score) , 3) # return tf.float64
+    return decimal_numbers(Dice_score , 3) # return tf.float64
 
