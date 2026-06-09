@@ -241,7 +241,6 @@ def convert_to_channel_last(img , label) :
     )
     return img , label
 
-
 class tile :
     def __init__(self , tile_dim):
         self.tile_dim = tile_dim
@@ -250,26 +249,29 @@ class tile :
         label = tf.tile(label , self.tile_dim)
         return img , label
     
+def cast32(img , label) :
+    img   = tf.cast(img   , dtype=tf.float32)
+    label = tf.cast(label , dtype=tf.float32)
 
-def cast(img , label) :
-    img = tf.cast(
-        img , 
-        dtype=tf.float32
-    )
-
-    label = tf.cast(
-        label , 
-        dtype=tf.float32
-    )
     return img , label
 
-def final(img , label) :
-
-    img.set_shape([None , 128 , 128 , 128 , 3])
-    label.set_shape([None , 128 , 128 , 128 , 3])
+def cast16(img , label) :
+    img   = tf.cast(img   , dtype=tf.float16)
+    label = tf.cast(label , dtype=tf.float16)
     
     return img , label
-    
+
+
+class setShape :
+    def __init__(self , shape):
+        self.shape = shape
+    def set(self , img , label) :
+        img.set_shape(self.shape)
+        label.set_shape(self.shape)
+        
+        return img , label
+
+
     
 
 
