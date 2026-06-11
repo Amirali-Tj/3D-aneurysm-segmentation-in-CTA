@@ -4,11 +4,11 @@ from pprint import pprint
 
 
 class WeightedSumOfLosses(sm3.base.objects.SumOfLosses) :
-    def __init__(self , l1 , l2 , alpha=0.5) :
+    def __init__(self , l1 , l2 , alpha=[1 , 1]) :
         super().__init__(l1 , l2)
         self.alpha = alpha
     def __call__(self , gt , pr) :
-        return self.alpha*self.l1(gt , pr) + (1 - self.alpha)*self.l2(gt , pr)
+        return self.alpha[0]*self.l1(gt , pr) + self.alpha[1]*self.l2(gt , pr)
 
    
 def unfreeze_model(model , unfreeze_point_name , except_layers_type) :
