@@ -246,7 +246,7 @@ class tile :
         self.tile_dim = tile_dim
     def tile(self , img , label) :
         img   = tf.tile(img , self.tile_dim)
-        label = tf.tile(label , self.tile_dim)
+        #label = tf.tile(label , self.tile_dim)
         return img , label
     
 def cast32(img , label) :
@@ -263,11 +263,12 @@ def cast16(img , label) :
 
 
 class setShape :
-    def __init__(self , shape):
-        self.shape = shape
+    def __init__(self , imgShape  , labelShape):
+        self.imgShape   = imgShape
+        self.labelShape = labelShape
     def set(self , img , label) :
-        img.set_shape(self.shape)
-        label.set_shape(self.shape)
+        img.set_shape(self.imgShape)
+        label.set_shape(self.labelShape)
         
         return img , label
 
