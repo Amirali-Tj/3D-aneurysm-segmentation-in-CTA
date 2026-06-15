@@ -96,6 +96,21 @@ class randomMultiWindowStackig() : # on-fly and cache
         )
         #---
         img_arr   = windows[1: , : , : , :]
-        label_arr = tf.tile(tf.expand_dims(label_arr , axis=0) , [tf.shape(self.ranges)[0] , 1 , 1 , 1])
+        label_arr = tf.tile(tf.expand_dims(label_arr , axis=0) , [tf.shape(self.ranges)[0] , 1 , 1 , 1]) # redundant line
         #---
         return img_arr , label_arr
+    def apply_default(self , img , label) :
+        defaultWL = self.default[0][0]
+        defaultWW = self.default[0][1]
+
+        minHU = defaultWL - (defaultWW/2)
+        maxHU = defaultWL + (defaultWW/2)
+
+        img = tf.clip_by_value(
+            img ,
+            minHU ,
+            maxHU
+        )
+
+        return img , label
+        
