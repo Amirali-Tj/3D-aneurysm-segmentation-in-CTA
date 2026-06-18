@@ -82,4 +82,11 @@ def dataTensorLoading(dataset) :
         labels.extend(label)
 
     return images , labels
+
+
         
+def merge(*label) :
+    label_tensor  = np.array(label)
+    merged_tensor = np.sum(label_tensor , sum=0)
+
+    return merged_tensor
