@@ -193,19 +193,54 @@ class randomGeo : # should be wrapped with py func
         )
         return img_arr , label_arr
     
-    def flip(self , img_arr , label_arr) : 
+    def flipX(self , img_arr , label_arr) : 
         chance = tf.random.uniform(shape=()  , dtype=tf.float32)
-        axis   = tf.random.uniform(shape=() , minval=0 , maxval=3 , dtype=tf.int32)
         img_arr , label_arr = tf.cond(
             chance <= self.p ,
             lambda : (
                 tf.reverse(
                     img_arr ,
-                    axis=[axis]
+                    axis=[1]
                 ) ,
                 tf.reverse(
                     label_arr ,
-                    axis=[axis]
+                    axis=[1]
+                )
+            ) ,
+            lambda : (img_arr , label_arr)
+        )
+        return img_arr , label_arr
+    
+    def flipY(self , img_arr , label_arr) : 
+        chance = tf.random.uniform(shape=()  , dtype=tf.float32)
+        img_arr , label_arr = tf.cond(
+            chance <= self.p ,
+            lambda : (
+                tf.reverse(
+                    img_arr ,
+                    axis=[2]
+                ) ,
+                tf.reverse(
+                    label_arr ,
+                    axis=[2]
+                )
+            ) ,
+            lambda : (img_arr , label_arr)
+        )
+        return img_arr , label_arr
+    
+    def flipZ(self , img_arr , label_arr) : 
+        chance = tf.random.uniform(shape=()  , dtype=tf.float32)
+        img_arr , label_arr = tf.cond(
+            chance <= self.p ,
+            lambda : (
+                tf.reverse(
+                    img_arr ,
+                    axis=[0]
+                ) ,
+                tf.reverse(
+                    label_arr ,
+                    axis=[0]
                 )
             ) ,
             lambda : (img_arr , label_arr)
@@ -228,7 +263,34 @@ def normalize(img , label) :
     n_img = (img - min)/(max - min)
     return n_img , label
 
+class channelOps :
+    def __init__(self):
+        pass
 
+    def add_channel_dim(self , img , label) :
+        img   = tf.expand_dims(img   , axis=0)
+        label = tf.expand_dims(label , axis=0)
+        return img , label
+    
+    def convert_to_channel_last(self , img , label) :
+        img = tf.transpose(
+            img , 
+            perm = [0 , 2 , 3 , 4 , 1]
+        )
+
+        label = tf.transpose(
+            label ,
+            perm = [0 , 2 , 3 , 4 , 1]
+        )
+        return img , label
+
+
+
+def channelize(img , label) :
+    img   = tf.expand_dims(img   , axis=0)
+    label = tf.expand_dims(label , axis=0)
+    return img , label
+ 
 def convert_to_channel_last(img , label) :
     img = tf.transpose(
         img , 
