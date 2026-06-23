@@ -10,7 +10,6 @@ def dataSplitPerSize(dataPath) :
     largeAneurysm    = []
 
     for p in source :
-
         files = os.listdir(os.path.join(dataPath , p))
         aneurysmList = []
 
@@ -62,31 +61,11 @@ def dataSplitPerSample(sets , testRatio , seed=None) :
     return fullTrainSet , fullTestSet
 
 
+
 def dataTensorLoading(dataset) :
     images = []
     labels = []
-
-    for p in dataset :
-        files = os.listdir(p)
-        label = []
-        image = []
-        for file in files :
-            if "label" not in file :
-                image.append(os.path.join(p , file))
-            else :
-                label.append(os.path.join(p , file))
-        image = image*len(label)
-
-        images.extend(image)
-        labels.extend(label)
-
-    return images , labels
-
-
-def dataTensorLoadingNew(dataset) :
-    images = []
-    labels = []
-    merged = []
+    mergeds = []
 
     for p in dataset :
         files = os.listdir(p)
@@ -95,12 +74,12 @@ def dataTensorLoadingNew(dataset) :
         merged = []
 
         for file in files :
-            if "label" not in file :
+            if "label" not in file and "merged" not in file :
                 image.append(os.path.join(p , file))
             elif "merge" in file :
                 merged.append(os.path.join(p , file))
             else :
-                labels.append(os.path.join(p , file))
+                label.append(os.path.join(p , file))
         else :
             if len(merged) == 0 :
                 merged.append("NoMerge")
@@ -110,9 +89,9 @@ def dataTensorLoadingNew(dataset) :
 
         images.extend(image)
         labels.extend(label)
-        merged.extend(merged)
+        mergeds.extend(merged)
 
-    return images , labels , merged
+    return images , labels , mergeds
 
 
         
@@ -145,8 +124,3 @@ def merge(filePath) :
         return 1
     else :
         return 0
-
-
-#mainPath = "data/temp"
-#for file in os.listdir(mainPath) :
- #   merge(os.path.join(mainPath , file))
