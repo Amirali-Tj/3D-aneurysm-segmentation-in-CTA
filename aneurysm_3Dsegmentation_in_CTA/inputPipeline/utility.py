@@ -4,14 +4,26 @@ from scipy import ndimage
 import tensorflow as tf
 
 # debug shape problem
-def read_img(imgPath , labelPath) : # fixed
+def read_img(imgPath , labelPath , mergePath) : # fixed
     imgPath   = imgPath.numpy().decode("utf_8")
     labelPath = labelPath.numpy().decode("utf_8")
+    mergePath = mergePath.numpy().decode("utf_8")
+
     img   = nib.as_closest_canonical(nib.load(imgPath)) # standard image shape
     label = nib.as_closest_canonical(nib.load(labelPath))
     imgTensor   = img.get_fdata()
     labelTesnor = label.get_fdata()
-    return imgTensor, labelTesnor
+
+    mergeTensor = tf.cond(
+        mergePath != "NoMerge" ,
+        lambda : nib.as_closest_canonical(nib.load(mergePath)).get_fdata() , 
+        lambda : tf.convert_to_tensor(
+            [0] ,
+            dtype=tf.float64
+        )
+    )
+
+    return imgTensor, labelTesnor , mergeTensor
 
 class volume_crop : # make it graph compatable
     def __init__(self , cubeDim):
@@ -33,7 +45,7 @@ class volume_crop : # make it graph compatable
         volumeCenter = (tf.cast((xMin + xMax)/2 , dtype=tf.int32) , tf.cast((yMin + yMax)/2 , dtype=tf.int32) , tf.cast((zMin + zMax)/2 , dtype=tf.int32))
         return volumeCenter
   
-    def cropping(self , img_arr , label_arr) :
+    def cropping(self , img_arr , label_arr , merge_arr) : # add tf.cond
         volumeCenter = self._volCenterExtract(label_arr)
         xCenter , yCenter , zCenter     = volumeCenter
         xCubeDim , yCubeDim , zCubeDim  = self.cubeDim
@@ -43,6 +55,15 @@ class volume_crop : # make it graph compatable
         xHalfDim = HalfDims(xCubeDim)
         yHalfDim = HalfDims(yCubeDim)
         zHalfDim = HalfDims(zCubeDim)
+
+        label_arr = tf.cond(
+            tf.math.not_equal(
+                tf.size(merge_arr) , 
+                1
+            ) ,
+            lambda : merge_arr ,
+            lambda : label_arr
+        )
 
         zCropMinIx , zCropMaxIx = tf.cond(
             tf.equal(tf.math.floormod(zCubeDim , 2) , 0) ,
@@ -333,14 +354,5 @@ class setShape :
         label.set_shape(self.labelShape)
         
         return img , label
-
-
-    
-
-
-
-
-
-    
     
     
