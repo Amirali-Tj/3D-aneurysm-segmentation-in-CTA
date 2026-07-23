@@ -24,12 +24,12 @@ The dataset is organized on a **per-patient** basis. Each patient has a dedicate
 Dataset/
 ├── Patient_001/
 │   ├── Patient_001.nii
-│   ├── Patient_001_Small_MCA_Saccular_label.nii
-│   └── Patient_001_Large_ACOM_Fusiform_label.nii
+│   ├── Patient_001_@5_@MCA_@Saccular_label.nii
+│   └── Patient_001_@250_@ACOM_@Fusiform_label.nii
 │
 ├── Patient_002/
 │   ├── Patient_002.nii
-│   └── Patient_002_Medium_ICA_Saccular_label.nii
+│   └── Patient_002_@60_@ICA_@Saccular_label.nii
 │
 └── ...
 ```
@@ -45,7 +45,7 @@ PatientName.nii
 **Segmentation Label**
 
 ```text
-PatientName_<LesionSize>_<LesionLocation>_<LesionShape>_label.nii
+PatientName_@<LesionSize>_@<LesionLocation>_@<LesionShape>_label.nii
 ```
 
 Where:
@@ -64,6 +64,7 @@ Where:
 - 🧠 A patient may have **one or multiple aneurysms**.
 - 🏷️ Each aneurysm is stored as a **separate segmentation label**.
 - 📌 Lesion metadata (**size**, **location**, and **shape**) is encoded directly in the label filename, making it easy to filter or analyze specific aneurysm characteristics.
+- labels for patients with more than on aneurysm merged inorder to cover overlaps with other aneuryms in the volume
 
 ---
 
@@ -73,7 +74,9 @@ Every experiment follows the same preprocessing workflow:
 
 > **Original CTA Volume → ✂️ Crop → 🪟 Windowing → 🧠 3D U-Net → 🎯 Segmentation**
 
-The only difference between the three pipelines is the windowing strategy.
+### 📝 Notes
+ - The only difference between the three pipelines is the windowing strategy.
+ - Volumes crops by the center of lesion
 
 ---
 
@@ -84,7 +87,7 @@ A single predefined CT window is applied to the cropped CTA volume before patch 
 ```text
 Original CTA Volume
         │
-   ✂️ Crop Volume
+    Crop Volume
         │
  Single CT Window
         │
@@ -102,7 +105,7 @@ Multiple clinically relevant CT windows are generated from the cropped volume an
 ```text
 Original CTA Volume
         │
-   ✂️ Crop Volume
+    Crop Volume
         │
    ┌────┼────┐
    │    │    │
@@ -125,7 +128,7 @@ Instead of fixed window settings, random CT window parameters are generated duri
 ```text
 Original CTA Volume
         │
-   ✂️ Crop Volume
+    Crop Volume
         │
 Random Window Generator
         │
@@ -179,7 +182,8 @@ The segmentation network is based on a **3D U-Net with Resnet Backbone and SEs b
 Typical dependencies include:
 
 - Python
-- PyTorch
+- Tensorflow
+- Keras
 - NumPy
 - nibabel
 - SciPy
