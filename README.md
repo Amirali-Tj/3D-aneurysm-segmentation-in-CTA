@@ -10,9 +10,9 @@ Intracranial aneurysm segmentation is a challenging medical image analysis task 
 
 Since **CT windowing** directly affects the visibility of anatomical structures, this project explores how different windowing approaches impact the performance of a 3D U-Net.
 
-Before any windowing operation, each CTA volume is **cropped** to focus on the region of interest and remove unnecessary background. The cropped volume is then processed using one of three windowing strategies before being divided into 3D patches for training.
+Before any windowing operation, each CTA volume is **cropped** to focus on the region of interest and remove unnecessary background. The cropped volume is then processed using one of three windowing strategies.
 
-In addition, we investigate how the amount of spatial context, controlled through different patch sizes, influences segmentation quality.
+we also investigate how the amount of spatial context, controlled through different patch sizes , influences segmentation quality in addition to effects of lesion shape and location .
 
 ---
 
@@ -71,7 +71,7 @@ Where:
 
 Every experiment follows the same preprocessing workflow:
 
-> **Original CTA Volume → ✂️ Crop → 🪟 Windowing → 📦 Patch Extraction → 🧠 3D U-Net → 🎯 Segmentation**
+> **Original CTA Volume → ✂️ Crop → 🪟 Windowing → 🧠 3D U-Net → 🎯 Segmentation**
 
 The only difference between the three pipelines is the windowing strategy.
 
@@ -87,8 +87,6 @@ Original CTA Volume
    ✂️ Crop Volume
         │
  Single CT Window
-        │
- Patch Extraction
         │
      3D U-Net
         │
@@ -113,8 +111,6 @@ Original CTA Volume
    └────┴────┘
  Channel Stacking
         │
- Patch Extraction
-        │
      3D U-Net
         │
  Segmentation Mask
@@ -133,8 +129,6 @@ Original CTA Volume
         │
 Random Window Generator
         │
- Patch Extraction
-        │
      3D U-Net
         │
  Segmentation Mask
@@ -148,9 +142,9 @@ To evaluate the influence of spatial context, each pipeline was trained using th
 
 | Patch Size | Description |
 |------------|-------------|
-| **32 × 32 × 32** | Fine local anatomical details with limited context |
-| **64 × 64 × 64** | Balanced local detail and global context |
-| **128 × 128 × 128** | Larger anatomical context with higher memory requirements |
+|  **32 × 32 × 32** | Fine local anatomical details with limited context |
+|  **64 × 64 × 64** | Balanced local detail and global context |
+|  **128 × 128 × 128** | Larger anatomical context with higher memory requirements |
 
 This comparison helps analyze the trade-offs between:
 
@@ -164,26 +158,6 @@ This comparison helps analyze the trade-offs between:
 ## 🏗️ Model
 
 The segmentation network is based on a **3D U-Net with Resnet Backbone and SEs block** architecture for volumetric medical image segmentation.
-
----
-
-## 🧪 Experiments
-
-The project compares three CT windowing strategies across three different patch sizes.
-
-### 🪟 Windowing Strategies
-
-- ✅ Single Window
-- ✅ Predefined Multi-Window
-- ✅ Random Windowing
-
-### 📐 Patch Sizes
-
-- 32 × 32 × 32
-- 64 × 64 × 64
-- 128 × 128 × 128
-
-The objective is to understand how preprocessing and spatial context jointly affect intracranial aneurysm segmentation.
 
 ---
 
