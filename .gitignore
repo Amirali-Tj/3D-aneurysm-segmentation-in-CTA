@@ -1,7 +1,13 @@
 data/
+tuning_logs/
+models/
 train_protocol.txt
 stlTOnii.py
 pipelineTest.py
 dcm2niix.py
 ctaExtract.py
 comments.txt
+myCacheTrain.data-00000-of-00001
+myCacheTrain.index
+myCacheValid.data-00000-of-00001
+myCacheValid.index
