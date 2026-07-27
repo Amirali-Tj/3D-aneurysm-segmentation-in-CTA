@@ -4,7 +4,7 @@ from scipy import ndimage
 import tensorflow as tf
 
 
-def totalProbabilityForAug(total_proba , n_stage) : # return per stage proba when you want to set total augmentation probability
+def perStageProbaForAug(total_proba , n_stage) : # return per stage proba when you want to set total augmentation probability
     perStageProba = 1 - (tf.pow(total_proba , 1/n_stage))
     return perStageProba
 
