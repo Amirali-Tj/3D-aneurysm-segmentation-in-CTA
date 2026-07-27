@@ -4,10 +4,9 @@ from scipy import ndimage
 import tensorflow as tf
 
 
-def factorial(k) :
-    if k - 1 == 0 :
-        return 1
-    return k * factorial(k - 1)
+def totalProbabilityForAug(total_proba , n_stage) : # return per stage proba when you want to set total augmentation probability
+    perStageProba = 1 - (tf.pow(total_proba , 1/n_stage))
+    return perStageProba
 
 def read_img(imgPath , labelPath , mergePath) : # fixed
     imgPath   = imgPath.numpy().decode("utf_8")
@@ -188,11 +187,8 @@ class volume_crop : # make it graph compatable
         
 #-----------------------------
 class randomGeo : # should be wrapped with py func
-    def __init__(self , p , p_stage="per_stage"):
-        if p_stage == "per_stage" :
-            self.p = p
-        elif isinstance(p_stage , int) and p_stage > 0 :
-            pass
+    def __init__(self , p):
+        self.p = p
     def rot(self , img_arr , label_arr , * , imgOrder , lblOrder , imgCval , lblCval) :
         angle = tf.random.uniform(shape=() , minval=0 , maxval=360 , dtype=tf.int32)
         chance = tf.random.uniform(shape=()  , dtype=tf.float32)
