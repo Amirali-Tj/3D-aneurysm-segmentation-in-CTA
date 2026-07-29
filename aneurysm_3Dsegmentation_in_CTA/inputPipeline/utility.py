@@ -18,10 +18,10 @@ def read_img(imgPath , labelPath , mergePath) : # fixed
     imgTensor   = img.get_fdata()
     labelTesnor = label.get_fdata()
 
-    if mergeTensor != "NoMerge" :
+    if mergePath != "NoMerge" :
         mergeTensor = nib.as_closest_canonical(nib.load(mergePath)).get_fdata()
     else : 
-        mergeTensor = np.array([0] , dtype=tf.float64)
+        mergeTensor = np.array([0] , dtype=np.float64)
 
 
     return imgTensor, labelTesnor , mergeTensor
@@ -115,8 +115,8 @@ class randomGeo :
     def __init__(self , p) :
         self.p = p
     def rot(self , img_arr , label_arr , * , imgOrder , lblOrder , imgCval , lblCval) : # should be wrapped with py func
-        angle  = np.random.uniform(shape=() , minval=0 , maxval=360 , dtype=tf.int32)
-        chance = np.random.uniform(shape=()  , dtype=tf.float32)
+        angle  = np.random.uniform(low=0 , high=360)
+        chance = np.random.uniform()
 
         if chance < self.p : 
             img_arr = ndimage.rotate(
