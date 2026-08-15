@@ -19,7 +19,7 @@ class HyperSeUnetRes18(kt.HyperModel) :
 
     def set_tuning_param(self , unfreeze_point , learning_rate , alphForFocalLoss , alphaForWeightedFocalDiceloss) :
         self.unfreeze_point = unfreeze_point
-        self.learning_rate = self.learning_rate
+        self.learning_rate = learning_rate
         self.alpha1 = alphForFocalLoss
         self.alpha2 = alphaForWeightedFocalDiceloss
 
@@ -31,7 +31,7 @@ class HyperSeUnetRes18(kt.HyperModel) :
             classes     = self.classes, 
             activation  = self.activation ,
             encoder_weights = self.encoder_weights ,
-            encoder_freeze  = self.encoder_freeze,
+            encoder_freeze  = True,
             decoder_block_type = self.decoder_block_type ,
             encoder_features   = conf.encoderF_d4_res18 # set as tunable
         )
@@ -39,23 +39,25 @@ class HyperSeUnetRes18(kt.HyperModel) :
         # model unfreezing
         res18 = conf.unfreeze_model(
             res18 , 
-            hp.choice("unfreeze_point" , self.unfreeze_point) , # set as tunable
+            hp.Choice("unfreeze_point" , self.unfreeze_point) , # set as tunable
             keras.src.layers.normalization.batch_normalization.BatchNormalization
         )
 
         # loss definition
         binaryFocalLoss = sm3.losses.BinaryFocalLoss(
-            alpha=hp.choice("alpha1" , self.alpha1) # set as tunable
+            alpha=hp.Choice("alpha1" , self.alpha1) # set as tunable
         )
         diceLoss        = sm3.losses.dice_loss 
-        weightedBinaryFocalDiceLoss = conf.WeightedSumOfLosses(binaryFocalLoss , diceLoss , alpha=hp.choice("alpha2" , self.alpha2)) # set as tunable
+        weightedBinaryFocalDiceLoss = conf.WeightedSumOfLosses(binaryFocalLoss , diceLoss , alpha=[hp.Choice("alpha2_1" , self.alpha2[0]) , hp.Choice("alpha2_2" , self.alpha2[1])]) # set as tunable
 
         # learning rate difinition
-        lrRates = [hp.choice(f"lrStep{n}" , rates) for n , rates in enumerate(self.learning_rate)]
-
         lr = keras.optimizers.schedules.PiecewiseConstantDecay(
             self.steps ,
-            lrRates
+            [
+                hp.Choice("step 1" , self.learning_rate[0]) ,
+                hp.Choice("step 2" , self.learning_rate[1]) ,
+                hp.Choice("step 3" , self.learning_rate[2])
+            ]
         )
 
         # compilation
