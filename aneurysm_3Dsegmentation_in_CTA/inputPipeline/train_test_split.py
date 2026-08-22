@@ -42,27 +42,37 @@ def dataSplitPerSize(dataPath) :
 
 
 def dataSplitPerlocation(dataPath) :
-    source = os.listdir(dataPath)
-
-    # detcting locations
-    locDetector = set({})
-    for file in source :
-        nameSplit = file.split("_@")
-        location       = nameSplit[2]
-        locDetector.add(location)
-    print("labels :" , locDetector)
-
-    # creating location containers
+    source    = os.listdir(dataPath)
     container = {}
-    for loc in locDetector :
-        container[loc] = []
-    
     # adding files to their locations
-    for loc in locDetector :
-        for file in source :
-            if loc in file :
-                container[loc].append(file)
-    
+    for p in source :
+        files = os.listdir(os.path.join(dataPath , p))
+        locList = []
+        for file in files : 
+            if "label" in file :
+                file      = file.rstrip("-label.nii")
+                nameSplit = file.split("_@")
+                loc       = nameSplit[2]
+
+                exst = container.get(loc , 0)
+                if exst == 0 :
+                    container[loc] = []
+            
+                locList.append(loc)
+        locUnq = set(locList)
+
+        # finding group
+        cntMax  = 0
+        nameMax = "" 
+        for loc in locUnq :
+            cnt = locList.count(loc)
+            if cnt > cntMax :
+                cntMax  = cnt
+                nameMax = loc
+        
+        # add to container
+        container[nameMax].append(os.path.join(dataPath , p))
+
     return container
 
 def dataSpiltPerConfiguration(dataPath) :
@@ -200,3 +210,14 @@ def merge(filePath) :
         return 1
     else :
         return 0
+
+
+
+
+
+#---------------------------
+dataSource = "data/CTA nii" 
+
+sizeContainer = dataSplitPerSize(dataSource)
+locContainer  = dataSplitPerlocation(dataSource)
+print(locContainer["BASILAR"])
