@@ -34,8 +34,84 @@ def dataSplitPerSize(dataPath) :
             largeAneurysm.append(os.path.join(dataPath , p))
 
     
-    return smallAneurysm , mediumAneurysm , largeAneurysm
+    return {
+        "S" : smallAneurysm ,
+        "M" : mediumAneurysm ,
+        "L" : largeAneurysm 
+    }
 
+
+def dataSplitPerlocation(dataPath) :
+    source = os.listdir(dataPath)
+
+    # detcting locations
+    locDetector = set({})
+    for file in source :
+        nameSplit = file.split("_@")
+        location       = nameSplit[2]
+        locDetector.add(location)
+    print("labels :" , locDetector)
+
+    # creating location containers
+    container = {}
+    for loc in locDetector :
+        container[loc] = []
+    
+    # adding files to their locations
+    for loc in locDetector :
+        for file in source :
+            if loc in file :
+                container[loc].append(file)
+    
+    return container
+
+def dataSpiltPerConfiguration(dataPath) :
+    source = os.listdir(dataPath)
+
+    # detcting locations
+    confDetector = set({})
+    for file in source :
+        nameSplit = file.split("_@")
+        conf       = nameSplit[3]
+        confDetector.add(conf)
+    print("labels :" , confDetector)
+
+    # creating location containers
+    container = {}
+    for conf in confDetector :
+        container[conf] = []
+    
+    # adding files to their locations
+    for conf in confDetector :
+        for file in source :
+            if conf in file :
+                container[conf].append(file)
+    
+    return container
+
+def findCommon(containers) :
+    if len(containers) > 2 :
+        raise Exception("container length must be two")
+
+    # selecting first container
+    container_first  = containers[0]
+    container_second = containers[1]
+    commonContainer  = {}
+    
+    # iterating over containers
+    for key , item in container_first.items() :
+        for ky , itm in container_second.items() :
+            if item == itm :
+                ext = commonContainer.get(f"{key}_{key}" , 0)
+                if ext == 0 :
+                    commonContainer[f"{key}_{ky}"] = {}
+                    commonContainer[f"{key}_{ky}"].append(item) # or itm
+                    break
+                else : 
+                    commonContainer[f"{key}_{ky}"].append(item) # or itm
+                    break
+    
+    return commonContainer
 
 
 def dataSplitPerSample(sets , testRatio , seed=None) :
