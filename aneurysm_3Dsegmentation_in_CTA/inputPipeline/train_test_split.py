@@ -76,27 +76,37 @@ def dataSplitPerlocation(dataPath) :
     return container
 
 def dataSpiltPerConfiguration(dataPath) :
-    source = os.listdir(dataPath)
-
-    # detcting locations
-    confDetector = set({})
-    for file in source :
-        nameSplit = file.split("_@")
-        conf       = nameSplit[3]
-        confDetector.add(conf)
-    print("labels :" , confDetector)
-
-    # creating location containers
+    source    = os.listdir(dataPath)
     container = {}
-    for conf in confDetector :
-        container[conf] = []
-    
     # adding files to their locations
-    for conf in confDetector :
-        for file in source :
-            if conf in file :
-                container[conf].append(file)
-    
+    for p in source :
+        files = os.listdir(os.path.join(dataPath , p))
+        confList = []
+        for file in files : 
+            if "label" in file :
+                file      = file.rstrip("-label.nii")
+                nameSplit = file.split("_@")
+                conf       = nameSplit[3]
+
+                exst = container.get(conf , 0)
+                if exst == 0 :
+                    container[conf] = []
+            
+                confList.append(conf)
+        confUnq = set(confList)
+
+        # finding group
+        cntMax  = 0
+        nameMax = "" 
+        for conf in confUnq :
+            cnt = confList.count(conf)
+            if cnt > cntMax :
+                cntMax  = cnt
+                nameMax = conf
+        
+        # add to container
+        container[nameMax].append(os.path.join(dataPath , p))
+
     return container
 
 def findCommon(containers) :
@@ -218,6 +228,7 @@ def merge(filePath) :
 #---------------------------
 dataSource = "data/CTA nii" 
 
-sizeContainer = dataSplitPerSize(dataSource)
-locContainer  = dataSplitPerlocation(dataSource)
-print(locContainer["BASILAR"])
+#sizeContainer = dataSplitPerSize(dataSource)
+#locContainer  = dataSplitPerlocation(dataSource)
+confContainer = dataSpiltPerConfiguration(dataSource)
+pprint(confContainer["BLISTER"])
