@@ -1,4 +1,8 @@
 import tensorflow as tf
+import os
+import nibabel as nib
+import numpy as np
+
 
 class multiWindowStacking : # cache
     def __init__(self  , *ranges):
@@ -113,4 +117,34 @@ class randomMultiWindowStackig() : # on-fly and cache
         )
 
         return img , label
-        
+
+
+
+def optimumWindowFinder(dataPath) :
+    source = os.listdir(dataPath)
+
+    for p in source :
+        files = os.listdir(os.path.join(dataPath , p))
+
+        # finding image and labels
+        image = None
+        labels = []
+
+        for file in files :
+            if "label" in file :
+                labels.append(os.path.join(dataPath , p , file))
+            if "merged" not in file and "label" not in file : 
+                image = os.path.join(dataPath , p , file)
+
+        # calculating window
+        img = nib.as_closest_canonical(nib.load(image))
+        img_arr = img.get_fdata()
+
+        for label in labels :
+            lbl     = nib.as_closest_canonical(nib.load(label))
+            lbl_arr = label.get_fdata()
+
+            voi = np.extract(lbl_arr == 1 , img_arr)
+
+            # continued ....
+
