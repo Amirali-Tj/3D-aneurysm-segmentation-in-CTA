@@ -59,7 +59,7 @@ def dataSplitPerlocation(dataPath) :
                     container[loc] = []
             
                 locList.append(loc)
-        locUnq = set(locList)
+        locUnq = set(locList)  # variation source
 
         # finding group
         cntMax  = 0
@@ -119,18 +119,23 @@ def findCommon(containers) :
     commonContainer  = {}
     
     # iterating over containers
-    for key , item in container_first.items() :
-        for ky , itm in container_second.items() :
-            if item == itm :
-                ext = commonContainer.get(f"{key}_{key}" , 0)
-                if ext == 0 :
-                    commonContainer[f"{key}_{ky}"] = {}
-                    commonContainer[f"{key}_{ky}"].append(item) # or itm
-                    break
-                else : 
-                    commonContainer[f"{key}_{ky}"].append(item) # or itm
-                    break
-    
+    for key in container_first.keys() :
+        key_vals = container_first[key]
+        for key_2 in container_second.keys() :
+            key_2_vals = container_second[key_2]
+            for name in key_vals :
+                for name_2 in key_2_vals :
+                    if name == name_2 :
+                        exst = commonContainer.get(f"{key}_{key_2}" , 0)
+                        if exst == 0 :
+                            commonContainer[f"{key}_{key_2}"] = []
+                            commonContainer[f"{key}_{key_2}"].append(name)
+                            break
+                            # ----
+                        else :
+                            commonContainer[f"{key}_{key_2}"].append(name)
+                            break
+            
     return commonContainer
 
 
@@ -221,14 +226,3 @@ def merge(filePath) :
     else :
         return 0
 
-
-
-
-
-#---------------------------
-dataSource = "data/CTA nii" 
-
-#sizeContainer = dataSplitPerSize(dataSource)
-#locContainer  = dataSplitPerlocation(dataSource)
-confContainer = dataSpiltPerConfiguration(dataSource)
-pprint(confContainer["BLISTER"])
