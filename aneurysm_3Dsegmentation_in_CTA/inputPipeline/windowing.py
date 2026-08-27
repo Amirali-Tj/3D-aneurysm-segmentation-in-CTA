@@ -1,4 +1,5 @@
 import tensorflow as tf
+import tensorflow_probability as tfp
 import os
 import nibabel as nib
 import numpy as np
@@ -45,9 +46,25 @@ class multiWindowStacking : # cache
 class quartileWindowStacking(multiWindowStacking) :
     def __init__(self) :
         pass
-    def _quaritleWindowFinder(image_arr , label_arr) : 
-        pass
+    def _quaritleWindowFinder(self , image_arr , label_arr) : 
+        voi = tf.boolean_mask(
+            image_arr , 
+            label_arr == 1
+        )
 
+        min , Q1 , Q3 , max = tfp.stats.percentile(voi , q=[0. , 25. , 75. , 100.] , interpolation="nearest")
+
+        self.ranges = [
+            [min , Q1] , # low  enhance
+            [Q1  , Q3] , # mid  enhance
+            [Q3 , max]   # high enhance
+        ]
+    
+    def WindowStacking(self , image_arr , label_arr) : 
+        self._quaritleWindowFinder(image_arr , label_arr)
+        image_arr , label_arr = super().WindowStacking(image_arr , label_arr)
+        return image_arr , label_arr
+        
 class randomMultiWindowStackig() : # on-fly and cache
     def __init__(self , default , wwRange , wlRange , p_ww , p_wl): # default as tf.float32
         self.default = tf.expand_dims(tf.convert_to_tensor(default , dtype=tf.float64) , axis=0)
