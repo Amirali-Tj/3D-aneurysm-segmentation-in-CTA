@@ -197,11 +197,19 @@ class randomGeo :
 # vectorize functions
 
 class fixedRangeNormalization :
-    def __init__(self , min_val , max_val):
-        self.min = min_val
-        self.max = max_val
+    def __init__(self , min_val , max_val , clip=False):
+        self.min  = min_val
+        self.max  = max_val
+        self.clip = clip
     
     def apply(self , img , label) :
+        if self.clip == True :
+            img = tf.clip_by_value(
+                img ,
+                self.min ,
+                self.max
+            )
+        
         n_img = (img - self.min)/(self.max - self.min)
         return n_img , label
 
