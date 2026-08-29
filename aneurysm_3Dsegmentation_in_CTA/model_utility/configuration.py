@@ -18,6 +18,9 @@ def unfreeze_model(model , unfreeze_point_name , except_layers_type) :
             unfreeze = True
         if unfreeze == True and not isinstance(layer , except_layers_type):
             layer.trainable = True
+
+    if unfreeze == False :
+        raise TypeError("Invalid unfreeze point name !!!")
     return model
 
 
@@ -58,6 +61,8 @@ encoderF_d2_res50 = [
 
 # Res18 Conv_3 and Conv_4 Group 
 
+unfreeze_Conv2_unit1ToEnd_res18   = "stage2_unit1_conv1"
+unfreeze_Conv2_unit2ToEnd_res18   = "stage2_unit2_conv1"
 unfreeze_Conv3_unit1ToEnd_res18   = "stage3_unit1_conv1"
 unfreeze_Conv3_unit2ToEnd_res18   = "stage3_unit2_conv1"
 unfreeze_Conv4_unit1ToEnd_res18   = "stage4_unit1_conv1"
@@ -70,5 +75,4 @@ unfreeze_Conv4_unit6ToEnd_res50   = "conv3d_64"
 unfreeze_Conv5_unit1ToEnd_res50   = "conv3d_69"
 unfreeze_Conv5_unit2ToEnd_res50   = "conv3d_75"
 unfreeze_Conv5_unit3ToEnd_res50   = "conv3d_80"
-
 
