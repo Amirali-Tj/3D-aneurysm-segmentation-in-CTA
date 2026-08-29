@@ -196,6 +196,15 @@ class randomGeo :
     
 # vectorize functions
 
+class fixedRangeNormalization :
+    def __init__(self , min_val , max_val):
+        self.min = min_val
+        self.max = max_val
+    
+    def apply(self , img , label) :
+        n_img = (img - self.min)/(self.max - self.min)
+        return n_img , label
+
 def normalize(img , label) :
     max   = tf.math.reduce_max(
         img , 
@@ -209,28 +218,6 @@ def normalize(img , label) :
     )
     n_img = (img - min)/(max - min)
     return n_img , label
-
-class channelOps :
-    def __init__(self):
-        pass
-
-    def add_channel_dim(self , img , label) :
-        img   = tf.expand_dims(img   , axis=0)
-        label = tf.expand_dims(label , axis=0)
-        return img , label
-    
-    def convert_to_channel_last(self , img , label) :
-        img = tf.transpose(
-            img , 
-            perm = [0 , 2 , 3 , 4 , 1]
-        )
-
-        label = tf.transpose(
-            label ,
-            perm = [0 , 2 , 3 , 4 , 1]
-        )
-        return img , label
-
 
 
 def channelize(img , label) :
