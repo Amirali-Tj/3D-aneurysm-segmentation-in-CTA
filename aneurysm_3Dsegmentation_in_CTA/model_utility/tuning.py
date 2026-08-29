@@ -6,7 +6,7 @@ from . import metrics
 from . import configuration as conf
 
 
-class HyperSeUnetResNet(kt.HyperModel) :
+class HyperUnetResNet(kt.HyperModel) :
     def __init__(self , backbone , input_shape , classes , activation , encoder_weights , encoder_freeze , encoder_features , decoder_block_type , steps):
         super().__init__()
         self.backbone           = backbone 
@@ -83,7 +83,7 @@ class HyperSeUnetResNet(kt.HyperModel) :
 
 
 
-class HyperSeFPNResNet(kt.HyperModel) :
+class HyperFPNResNet(kt.HyperModel) :
     def __init__(self , backbone , input_shape , classes , activation , encoder_weights , encoder_freeze , encoder_features , pyramid_aggregation , pyramid_block_filter , steps):
         super().__init__()
         self.backbone             = backbone 
