@@ -168,6 +168,6 @@ def optimumWindowFinder(dataPath) :
         "levelMin" : np.min(allLevel) , 
         "levelMax" : np.max(allLevel) ,
         "widthMin" : np.min(allWidth) , 
-        "widthMax" : np.min(allWidth)  
+        "widthMax" : np.max(allWidth)  
     }
 
