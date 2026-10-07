@@ -7,39 +7,51 @@ import numpy as np
 
 class multiWindowStacking : # cache
     def __init__(self  , ranges):
+        if len(ranges) != 3 :
+            raise Exception("just three widnow is acceptable !!!")
         self.ranges = tf.convert_to_tensor(list(ranges) , dtype=tf.float64)
     def WindowStacking(self , img_arr , label_arr) : # graph compatibale
-        def cond(rng , i , img_arr , stackedWindows) :
-            return i < tf.shape(rng)[0]
-        def body(rng , i , img_arr , stackedWindows) :
-            wl = rng[i][0]
-            ww = rng[i][1]
-            minHU = wl - (ww/2)
-            maxHU = wl + (ww/2)
-            windowChannel  = tf.expand_dims(tf.clip_by_value(img_arr , minHU , maxHU) , axis=0)
-            stackedWindows = tf.concat([stackedWindows , windowChannel] , axis=0)
-            i+=1
-            return rng , i , img_arr , stackedWindows
-        _ , _ , _ , windows = tf.while_loop(
-            cond ,
-            body ,
-            loop_vars=[
-                self.ranges ,
-                0 , 
-                img_arr ,
-                tf.expand_dims(tf.zeros(tf.shape(img_arr) , dtype=tf.float64) , axis=0)
-            ] , 
-            shape_invariants = [
-                self.ranges.get_shape(),
-                tf.TensorShape(()) ,
-                img_arr.get_shape() , 
-                tf.TensorShape([None , None , None , None])
-            ]
+        w1_param = self.ranges[0]
+        w2_param = self.ranges[1]
+        w3_param = self.ranges[2]
+
+        w1_min = w1_param[0]
+        w1_max = w1_param[1]
+
+        w2_min = w2_param[0]
+        w2_max = w2_param[1]
+
+        w3_min = w3_param[0]
+        w3_max = w3_param[1]
+
+        img_w1 = tf.clip_by_value(
+            img_arr ,
+            w1_min ,
+            w1_max
         )
-        #---
-        img_arr   = windows[1: , : , : , :]
-        label_arr = tf.tile(tf.expand_dims(label_arr , axis=0) , [tf.shape(self.ranges)[0] , 1 , 1 , 1])
-        #---
+        img_w2 = tf.clip_by_value(
+            img_arr ,
+            w2_min ,
+            w2_max
+        )
+        img_w3 = tf.clip_by_value(
+            img_arr ,
+            w3_min ,
+            w3_max
+        )
+
+        img_arr = tf.stack(
+            [img_w1 , img_w2 , img_w3] ,
+            axis=0
+        ) # img_arr will be channelized here
+
+        
+        label_arr = tf.expand_dims(
+            label_arr ,
+            axis=0
+        ) # label_arr will be channelized here
+        
+
         return img_arr , label_arr
 
 
@@ -47,21 +59,30 @@ class quartileWindowStacking(multiWindowStacking) :
     def __init__(self) :
         pass
     def _quaritleWindowFinder(self , image_arr , label_arr) : 
+        label_arr.set_shape([None , None , None])
+        
         voi = tf.boolean_mask(
             image_arr , 
             label_arr == 1
         )
 
-        min , Q1 , Q3 , max = tfp.stats.percentile(voi , q=[0. , 25. , 75. , 100.] , interpolation="nearest")
+        Q_stats = tfp.stats.percentile(voi , q=[0. , 25. , 75. , 100.] , interpolation="nearest")
+        min = Q_stats[0]
+        Q1  = Q_stats[1]
+        Q3  = Q_stats[2] 
+        max = Q_stats[3] 
 
-        self.ranges = [
+        ranges = [
             [min , Q1] , # low  enhance
             [Q1  , Q3] , # mid  enhance
-            [Q3 , max]   # high enhance
+            [Q3  , max]  # high enhance
         ]
+        
+        return ranges
     
     def WindowStacking(self , image_arr , label_arr) : 
-        self._quaritleWindowFinder(image_arr , label_arr)
+        ranges = self._quaritleWindowFinder(image_arr , label_arr)
+        super().__init__(ranges)
         image_arr , label_arr = super().WindowStacking(image_arr , label_arr)
         return image_arr , label_arr
 
