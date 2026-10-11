@@ -3,6 +3,7 @@ import tensorflow_probability as tfp
 import os
 import nibabel as nib
 import numpy as np
+import keras
 
 
 class multiWindowStacking : # cache
@@ -191,3 +192,36 @@ def optimumWindowFinder(dataPath) :
         "widthMax" : np.max(allWidth)  
     }
 
+
+class autoWindowing(keras.layers.Layer) :
+    def __init__(self , initialLevel , initialWindow) :
+        super().__init__()
+
+        self.level = self.add_weight(
+            shape = (1 , ) ,
+            initializer = keras.initializers.Constant(initialLevel) ,
+            trainable = True
+        )
+
+        self.hWindow = self.add_weight(
+            shape = (1 , ) ,
+            initializer = keras.initializers.Constant(initialWindow/2) ,
+            trainable = True
+        )
+    
+    def _normalize(self , tensor) :
+        min_val = tf.math.reduce_min(tensor)
+        max_val = tf.math.reduce_max(tensor)
+
+        return (tensor - min_val)/(max_val - min_val)
+    
+    def call(self , tensor) :
+        L = self.level - self.hWindow
+        U = self.level + self.hWindow
+
+        wTensor = tf.clip_by_value(
+            clip_value_min=L ,
+            clip_value_max=U
+        )
+
+        return self._normalize(tensor)
