@@ -145,13 +145,17 @@ class randomWindowing(windowing) : # on-fly
         return img , label
 
 
-def optimumWindowFinder(dataPath) :
+def optimumWindowFinder(dataPath , filter=[]) :
     source = os.listdir(dataPath)
     allLevel  = []
     allWidth  = []
 
     for p in source :
-        files = os.listdir(os.path.join(dataPath , p))
+        p_dir = os.path.join(dataPath , p)
+        files = os.listdir(p_dir)
+        
+        if p_dir in filter :
+            continue
 
         # finding image and labels
         image = None
@@ -189,7 +193,9 @@ def optimumWindowFinder(dataPath) :
         "levelMin" : np.min(allLevel) , 
         "levelMax" : np.max(allLevel) ,
         "widthMin" : np.min(allWidth) , 
-        "widthMax" : np.max(allWidth)  
+        "widthMax" : np.max(allWidth) , 
+        "levels"   : allLevel ,
+        "widths"   : allWidth  
     }
 
 
