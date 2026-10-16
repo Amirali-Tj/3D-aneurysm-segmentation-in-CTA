@@ -2,7 +2,17 @@ import nibabel as nib
 import numpy as np
 from scipy import ndimage
 import tensorflow as tf
+import pickle
 
+def write_obj(obj , file_name) :
+  with open(file_name , 'wb') as f :
+    pickle.dump(obj , f)
+
+def read_obj(file_name) :
+  with open(file_name , 'rb') as f :
+    loaded = pickle.load(f)
+
+  return loaded
 
 def perStageProbaForAug(total_proba , n_stage) : # return per stage proba when you want to set total augmentation probability
     perStageProba = 1 - (tf.pow(total_proba , 1/n_stage))
@@ -275,5 +285,4 @@ class setShape :
         label.set_shape(self.labelShape)
         
         return img , label
-    
     
