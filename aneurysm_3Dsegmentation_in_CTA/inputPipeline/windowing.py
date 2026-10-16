@@ -216,18 +216,21 @@ class autoWindowing(keras.layers.Layer) :
         )
     
     def _normalize(self , tensor) :
-        min_val = tf.math.reduce_min(tensor)
-        max_val = tf.math.reduce_max(tensor)
+        min_val = keras.ops.amin(tensor)
+        max_val = keras.ops.amax(tensor)
 
         return (tensor - min_val)/(max_val - min_val)
     
-    def call(self , tensor) :
+    def call(self , tensor , trainig=None) :
         L = self.level - self.hWindow
         U = self.level + self.hWindow
 
-        wTensor = tf.clip_by_value(
-            clip_value_min=L ,
-            clip_value_max=U
+        wTensor = keras.ops.clip(
+            tensor ,
+            x_min=L ,
+            x_max=U ,
         )
 
-        return self._normalize(tensor)
+        outTensor = self._normalize(wTensor)
+
+        return outTensor
