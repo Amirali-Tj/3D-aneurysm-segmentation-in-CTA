@@ -139,14 +139,19 @@ def findCommon(containers) :
     return commonContainer
 
 
-def dataSplitPerSample(sets , testRatio , seed=None) :
+def dataSplitPerSample(sets , testRatio , perSet=False , seed=None) :
     sets = list(sets)
     if seed != None :
         np.random.seed(seed)
 
     fullTrainSet = []
     fullTestSet  = []
+    perSetCollection = {
+        "train_set" : {} ,
+        "test_set"  : {}
+    }
 
+    set_ix = 0
     for set in sets :
         np.random.shuffle(set)
         setLen = len(set)
@@ -158,8 +163,16 @@ def dataSplitPerSample(sets , testRatio , seed=None) :
 
         fullTrainSet.extend(trainSet)
         fullTestSet.extend(testSet)
+
+        if perSet :
+            perSetCollection["train_set"][set_ix] = trainSet
+            perSetCollection["test_set"][set_ix]  = testSet
+            set_ix+=1
+        else :
+            perSetCollection = {}
+        
     
-    return fullTrainSet , fullTestSet
+    return fullTrainSet , fullTestSet , perSetCollection
 
 
 
