@@ -32,54 +32,26 @@ def V_Recall(gr , pr) :   # lesion voxel detection rate
        dtype=tf.int32
     )
     V_Recall = tf.math.divide(NtPos , NgrPos)*100
-    return decimal_numbers(V_Recall , 3) #tf.float64    
-
-def V_accuracy(gr , pr) : #voxel detection rate (lesion and backgeound)
-    pr = tf.where(pr >=0.5 , 1.0 , 0.0)
-    tPos  = tf.math.multiply(gr , pr)
-    NtPos = tf.math.count_nonzero(
-       tPos , 
-       axis=[1 , 2 , 3 , 4] , # batch dim
-       keepdims=True , 
-       dtype=tf.int32
-    )
-    NgrPos = tf.math.count_nonzero(
-       gr , 
-       axis=[1 , 2 , 3 ,4] ,
-       keepdims=True , 
-       dtype=tf.int32
-    )
-    #-----
-    rPr = tf.where(pr == 0 , 1.0 , 0.0)
-    rGr = tf.where(gr == 0 , 1.0 , 0.0)
-    tNeg  = tf.math.multiply(rGr , rPr)
-    NtNeg = tf.math.count_nonzero(
-       tNeg , 
-       axis=[1 , 2 , 3 ,4] , # batch dim
-       keepdims=True , 
-       dtype=tf.int32
-    )
-    NofVoxels = tf.size(tf.reduce_mean(gr , axis=0)) # num of voxels
-    V_accuracy =tf.math.multiply(tf.math.divide(NtPos + NtNeg , NofVoxels) , 100)
-    return decimal_numbers(V_accuracy , 3) # tf.float64
+    return V_Recall #tf.float64    
 
 def HD(y_true , y_pred) :
     y_true = np.where( # make a bool numpy array
-        y_true.numpy() == 1 ,
+        y_true == 1 ,
         True ,
         False
     )
     y_pred = np.where(
-        y_pred.numpy() == 1 ,
+        y_pred == 1 ,
         True ,
         False
     )
     batchHD = []
     for y_true_vol , y_pred_vol in zip(y_true , y_pred) :
         y_true3D  = y_true_vol[: , : , : , 0] # just one channel used to make it to 3d tensor
+        y_pred3D  = y_pred_vol[: , : , : , 0] # just one channel used to make it to 3d tensor
         distances = sd.compute_surface_distances(
             y_true3D , 
-            y_pred_vol ,
+            y_pred3D ,
             spacing_mm=[0.48 , 0.48 , 0.5] # averge image spacing used images . 
         )
         hausdorff = sd.compute_robust_hausdorff(
@@ -88,7 +60,7 @@ def HD(y_true , y_pred) :
         )
         batchHD.append(hausdorff)
 
-    return decimal_numbers(tf.reduce_mean(batchHD) , 3)
+    return tf.convert_to_tensor(batchHD)
      
 def dice(y_true , y_pred) :
     y_pred = tf.where(y_pred >=0.5 , 1.0 , 0.0)
@@ -111,5 +83,39 @@ def dice(y_true , y_pred) :
         dtype=tf.int32
     )
     Dice_score = tf.math.divide(overLapArea , grPos + prPos)
-    return decimal_numbers(Dice_score , 3) # return tf.float64
+    return Dice_score # return tf.float64
+
+def precision(gr , pr) :
+    pr = tf.where(pr >=0.5 , 1.0 , 0.0)
+    tPos  = tf.math.multiply(gr , pr)
+    NtPos = tf.math.count_nonzero(
+        tPos , 
+        axis=[1 , 2 , 3 , 4] ,
+        keepdims=True , 
+        dtype=tf.int32
+    )
+
+    fPos  = tf.math.subtract(
+        tf.math.subtract(gr - pr) , 
+        tf.constant([1] , dtype=tf.float32)
+        )
+    NfPos = tf.math.count_nonzero(
+        fPos ,
+        axis=[1 , 2 , 3 , 4] ,
+        keepdims=True ,
+        dtype=tf.float32
+    )
+
+    
+    precision = tf.math.divide(NtPos , (NtPos + NfPos))*100
+    return precision #tf.float64
+
+
+def f1_score(gr , pr) :
+    v_recall = V_Recall(gr , pr)
+    prec     = precision(gr , pr)
+
+    f1_score = tf.math.divide(2*v_recall*prec , tf.math.sum(v_recall , prec))*100
+
+    return f1_score #tf.float64
 
