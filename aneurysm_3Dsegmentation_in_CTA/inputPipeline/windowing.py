@@ -99,14 +99,14 @@ class windowing :
 
 
 class randomWindowing(windowing) : # on-fly
-    def __init__(self , default , wwRange , wlRange , p_ww , p_wl): # default as tf.float32
-        self.default = tf.convert_to_tensor(default , dtype=tf.float32)
+    def __init__(self , default , wwRange , wlRange , p_ww , p_wl):
+        self.default = tf.convert_to_tensor(default , dtype=tf.float64)
         super().__init__(self.default[0] , self.default[1])
 
-        self.wwRange = tf.convert_to_tensor(wwRange , dtype=tf.float32)
-        self.wlRange = tf.convert_to_tensor(wlRange , dtype=tf.float32)
-        self.p_ww    = tf.convert_to_tensor(p_ww , dtype=tf.float32)
-        self.p_wl    = tf.convert_to_tensor(p_wl , dtype=tf.float32)
+        self.wwRange = tf.convert_to_tensor(wwRange , dtype=tf.float64)
+        self.wlRange = tf.convert_to_tensor(wlRange , dtype=tf.float64)
+        self.p_ww    = tf.convert_to_tensor(p_ww , dtype=tf.float64)
+        self.p_wl    = tf.convert_to_tensor(p_wl , dtype=tf.float64)
     def WindowStacking(self , img_arr , label_arr) : # graph compatibale
         rGenWL = tf.cond(
             tf.random.uniform(shape=() , dtype=tf.float64) <= self.p_wl ,
@@ -114,7 +114,7 @@ class randomWindowing(windowing) : # on-fly
                 shape=() ,
                 minval=self.wlRange[0] ,
                 maxval=self.wlRange[1] ,
-                dtype=tf.float32
+                dtype=tf.float64
             ),
             lambda : self.default[0]
             )
@@ -124,7 +124,7 @@ class randomWindowing(windowing) : # on-fly
                 shape=() ,
                 minval=self.wwRange[0] ,
                 maxval=self.wwRange[1] ,
-                dtype=tf.float32
+                dtype=tf.float64
             ) ,
             lambda : self.default[1]
             )
