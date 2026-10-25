@@ -237,6 +237,20 @@ def normalize(img , label) :
     n_img = (img - min)/(max - min)
     return n_img , label
 
+def perChannelNormalize(img , label) :
+    max   = tf.math.reduce_max(
+        img , 
+        axis=[1 , 2 , 3] ,
+        keepdims=True
+    )
+    min   = tf.math.reduce_min(
+        img ,
+        axis=[1 , 2 , 3] ,
+        keepdims=True
+    )
+    n_img = (img - min)/(max - min)
+    return n_img , label
+
 
 def channelize(img , label) :
     img   = tf.expand_dims(img   , axis=0)
