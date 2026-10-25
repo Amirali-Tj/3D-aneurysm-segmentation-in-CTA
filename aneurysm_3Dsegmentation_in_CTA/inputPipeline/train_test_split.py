@@ -207,7 +207,62 @@ def dataTensorLoading(dataset) :
 
     return images , labels , mergeds
 
+def dataTensorloadingPerSize(dataset) :
+    # plotting aneurysm sizes
 
+    smallImgSet    = []
+    mediumImgSet    = []
+    largeImgSet    = []
+
+    smallLabelSet  = []
+    mediumLabelSet = []
+    largeLabelSet  = []
+
+    smallMergeSet  = []
+    mediumMergeSet = []
+    largeMergeSet  = []
+
+    for p in dataset :
+        p_dir = os.listdir(p)
+        labCntS = 0
+        labCntM = 0
+        labCntL = 0
+        mergeFile= None
+
+        for file in p_dir :
+            if "label" in file :
+                nameSplit = file.split("_@")
+                aneurysmSize = int(nameSplit[1])
+                if aneurysmSize <= 50 :
+                    smallLabelSet.append(os.path.join(p , file))
+                    labCntS+=1
+                elif aneurysmSize >50 and aneurysmSize <=200 :
+                    mediumLabelSet.append(os.path.join(p , file))
+                    labCntM+=1
+                elif aneurysmSize > 200 :
+                    largeLabelSet.append(os.path.join(p , file))
+                    labCntL+=1
+            elif "merged" in file :
+                mergeFile = os.path.join(p , file)
+            else :
+                imgFile   = os.path.join(p , file)
+        else :
+            if mergeFile == None :
+                mergeFile = "NoMerge"
+
+            smallMergeSet.extend([mergeFile]*labCntS)
+            mediumMergeSet.extend([mergeFile]*labCntM)
+            largeMergeSet.extend([mergeFile]*labCntL)
+
+            smallImgSet.extend([imgFile]*labCntS)
+            mediumImgSet.extend([imgFile]*labCntM)
+            largeImgSet.extend([imgFile]*labCntL)
+
+    return {
+        "S" : [smallImgSet  , smallLabelSet  , smallMergeSet] ,
+        "M" : [mediumImgSet , mediumLabelSet , mediumMergeSet] ,
+        "L" : [largeImgSet  , largeLabelSet  , largeMergeSet]
+    }
         
 def merge(filePath) :
     pFiles = os.listdir(filePath)
