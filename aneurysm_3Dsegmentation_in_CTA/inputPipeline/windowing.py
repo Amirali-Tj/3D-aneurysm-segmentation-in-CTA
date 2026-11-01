@@ -101,7 +101,7 @@ class windowing :
 class randomWindowing(windowing) : # on-fly
     def __init__(self , default , wwRange , wlRange , p_ww , p_wl):
         self.default = tf.convert_to_tensor(default , dtype=tf.float64)
-        super().__init__(self.default[0] , self.default[1])
+        super().__init__(wl=self.default[0] , ww=self.default[1])
 
         self.wwRange = tf.convert_to_tensor(wwRange , dtype=tf.float64)
         self.wlRange = tf.convert_to_tensor(wlRange , dtype=tf.float64)
@@ -230,7 +230,88 @@ class autoWindowing(keras.layers.Layer) :
             x_min=L ,
             x_max=U ,
         )
-
         outTensor = self._normalize(wTensor)
+
+        return outTensor
+
+class autoWindowingMultiChannel(keras.layers.Layer) :
+    def __init__(self , initialLevel : list , initialWindow : list) :
+        super().__init__() 
+
+        if len(initialLevel) != 3 or len(initialWindow) != 3 :
+            raise Exception("Windows must be 3 in number")
+
+        self.level_1 = self.add_weight(
+            shape = (1 , ) ,
+            initializer = keras.initializers.Constant(initialLevel[0]) ,
+            trainable = True
+        )
+
+        self.level_2 = self.add_weight(
+            shape = (1 , ) ,
+            initializer = keras.initializers.Constant(initialLevel[1]) ,
+            trainable = True
+        )
+
+        self.level_3 = self.add_weight(
+            shape = (1 , ) ,
+            initializer = keras.initializers.Constant(initialLevel[2]) ,
+            trainable = True
+        )
+
+        self.hWindow_1 = self.add_weight(
+            shape = (1 , ) ,
+            initializer = keras.initializers.Constant(initialWindow[0]/2) ,
+            trainable = True
+        )
+
+        self.hWindow_2 = self.add_weight(
+            shape = (1 , ) ,
+            initializer = keras.initializers.Constant(initialWindow[1]/2) ,
+            trainable = True
+        )
+
+        self.hWindow_3 = self.add_weight(
+            shape = (1 , ) ,
+            initializer = keras.initializers.Constant(initialWindow[2]/2) ,
+            trainable = True
+        )
+    
+    def _normalizePerChan(self , tensor) :
+        min_val = keras.ops.amin(tensor , axis=[1 , 2 , 3] , keepdims=True)
+        max_val = keras.ops.amax(tensor , axis=[1 , 2 , 3] , keepdims=True)
+
+        return (tensor - min_val)/(max_val - min_val)
+    
+    def call(self , tensor , training=None) :
+        L1 = self.level_1 - self.hWindow_1
+        U1 = self.level_1 + self.hWindow_1
+
+        L2 = self.level_2 - self.hWindow_2
+        U2 = self.level_2 + self.hWindow_2
+
+        L3 = self.level_3 - self.hWindow_3
+        U3 = self.level_3 + self.hWindow_3
+
+        wTensor_1 = keras.ops.clip(
+            tensor ,
+            x_min=L1 ,
+            x_max=U1 ,
+        )
+
+        wTensor_2 = keras.ops.clip(
+            tensor ,
+            x_min=L2 ,
+            x_max=U2 ,
+        )
+
+        wTensor_3 = keras.ops.clip(
+            tensor ,
+            x_min=L3 ,
+            x_max=U3 ,
+        )
+
+        outTensor = keras.ops.concatenate([wTensor_1 , wTensor_2 , wTensor_3] , axis=-1)
+        outTensor = self._normalizePerChan(outTensor)
 
         return outTensor
