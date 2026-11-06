@@ -31,7 +31,7 @@ def V_Recall(gr , pr) :   # lesion voxel detection rate
        keepdims=True , 
        dtype=tf.int32
     )
-    V_Recall = tf.math.divide(NtPos , NgrPos)*100
+    V_Recall = tf.math.divide(NtPos , NgrPos)
     return V_Recall #tf.float64    
 
 def HD(y_true , y_pred) :
@@ -95,19 +95,19 @@ def precision(gr , pr) :
         dtype=tf.int32
     )
 
-    fPos  = tf.math.subtract(
-        tf.math.subtract(gr - pr) , 
-        tf.constant([1] , dtype=tf.float32)
-        )
+    mediator_1 = tf.math.subtract(gr , pr)
+    mediator_2 = tf.math.subtract(mediator_1 , 1)
+    fPos = tf.math.multiply(mediator_1 , mediator_2)
+
     NfPos = tf.math.count_nonzero(
         fPos ,
         axis=[1 , 2 , 3 , 4] ,
         keepdims=True ,
-        dtype=tf.float32
+        dtype=tf.int32
     )
 
     
-    precision = tf.math.divide(NtPos , (NtPos + NfPos))*100
+    precision = tf.math.divide(NtPos , (NtPos + NfPos))
     return precision #tf.float64
 
 
@@ -115,7 +115,7 @@ def f1_score(gr , pr) :
     v_recall = V_Recall(gr , pr)
     prec     = precision(gr , pr)
 
-    f1_score = tf.math.divide(2*v_recall*prec , tf.math.sum(v_recall , prec))*100
+    f1_score = tf.math.divide(2*v_recall*prec , tf.math.add(v_recall , prec))
 
     return f1_score #tf.float64
 
